@@ -1,11 +1,10 @@
 // client.h
-// Header file for all client functions and Client struct
+// Header file for all client functions and client struct
 
-struct client {
+typedef struct {
 	int port;
 	int studentID;
-};
-typedef struct client Client;
+} client;
 
-void setPort(Client *c, int port);
-void setStudentID(Client *c, int studentID);
+void setPort(client *c, int port);
+void setStudentID(client *c, int studentID);

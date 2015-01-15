@@ -13,3 +13,6 @@ $(EXECUTABLE): $(OBJECTS)
 
 .cpp.oo:
 	$(CC) $(CFLAGS) $< -o $@
+
+clean: 
+	rm -f $(EXECUTABLE) *.o

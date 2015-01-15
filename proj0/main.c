@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 	// Creating a client instance
-	Client *c = malloc(sizeof(Client));
+	client *c = (client *)malloc(sizeof(client));
 	
 	// No port specified, set port to 27993
 	if(argc == 3) {
