@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
-#include <regex.h>
 #include "client.h"
 
 int main(int argc, char *argv[]) {
 
 	int port, studentID;
+	char *hostname;
+
 	if(argc != 3 && argc != 5) {
 		printf("Usage: 3700client <-p port> [hostname] [NEU ID]\n");
 		return 0;
@@ -18,6 +19,8 @@ int main(int argc, char *argv[]) {
 	if(argc == 3) {
 		port = 27993;
 		studentID = atoi(argv[2]);
+		hostname = argv[1];
+		
 	}
 
 	// Set port to user specified port
@@ -25,11 +28,16 @@ int main(int argc, char *argv[]) {
 		// Get an int version of the char
 		port = atoi(argv[2]);
 		studentID = atoi(argv[4]);
+		hostname = argv[3];
 	}
 	
+	// Set all the client parameters
 	setPort(c, port);
 	setStudentID(c, studentID);
+	setHostname(c, hostname);
 
+	// Now run!
+	clientRun(c);
 
 	return 0;
 }
