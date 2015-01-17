@@ -5,6 +5,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include "client.h"
 
 void setPort(client *c, int port) {
@@ -40,12 +41,13 @@ void clientRun(client *c) {
 		return;
 	}
 	// Set socket info
-	soc.sin_family = htons(AF_INET);
-	soc.sin_port = htons(c->port);
+	soc.sin_family = htonl(AF_INET);
+	soc.sin_port = htonl(c->port);
+//	soc.sin_addr.s_addr = inet_addr("129.10.117.250");
 	memcpy(&(soc.sin_addr.s_addr), host->h_addr, host->h_length);
 
 	// Next connect client socket to server socket
-	status = connect(sockfd, (struct sockaddr *) &soc, sizeof(struct sockaddr_in));
+	status = connect(sockfd, (struct sockaddr *) &soc, sizeof(struct sockaddr));
 	
 	if(status == -1) {
 		printf("Error: failed to connect to socket\n");
