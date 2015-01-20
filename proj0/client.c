@@ -27,13 +27,21 @@ void clientRun(client *c) {
 		close(c->sockfd);	
 		return;
 	}
-		
-	char buffer[] = "cs3700spring2015 HELLO 583008\n";
-	// Send hello message
-	ssize_t x;
-	x = write(c->sockfd, buffer, sizeof(buffer));
-	printf("x=%lu\n", x);
+//	char write_buffer[256];
+	char read_buffer[256];
 
+	// Send hello message
+//	strcpy(write_buffer, "cs3700spring2015 HELLO 583008\n");
+	char write_buffer[] = "cs3700spring2015 HELLO 583008\n";
+	ssize_t x;
+	x = write(c->sockfd, write_buffer, sizeof(write_buffer));
+	printf("%lu bytes written\n", x);
+
+	// Now listen 
+	x = read(c->sockfd, read_buffer, sizeof(read_buffer)); 	
+	printf("%s\n", read_buffer);
+	printf("%lu bytes read\n", x);
+	
 	// Let's make sure to close the connection
 	close(c->sockfd);	
 }
