@@ -65,7 +65,7 @@ int clientInit(client *c) {
 //	soc.sin_addr.s_addr = inet_addr("129.10.117.250");
 	memcpy(&(soc.sin_addr.s_addr), host->h_addr, host->h_length);
 
-	printf("sin_family = %d; sin_port = %d, sin_add = %d\n", soc.sin_family,
+	printf("sin_family = %d; sin_port = %08x, sin_add = %d\n", soc.sin_family,
 			soc.sin_port, soc.sin_addr.s_addr);
 	// Next connect client socket to server socket
 	status = connect(c->sockfd, (struct sockaddr *) &soc, sizeof(soc));
