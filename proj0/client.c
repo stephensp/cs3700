@@ -21,34 +21,38 @@ void setHostname(client *c, char *hostname) {
 	c->hostname = hostname;
 }
 void clientRun(client *c) {
+	char	buffer[256];
+	ssize_t	x;
+	int	sol;
+
 	if(clientInit(c) == -1) {
 		// Gotta add some real error handling
 		printf("Error detected, exiting... \n");
 		close(c->sockfd);	
 		return;
 	}
-//	char write_buffer[256];
-	char read_buffer[256];
 
 	// Send hello message
-//	strcpy(write_buffer, "cs3700spring2015 HELLO 583008\n");
-	char write_buffer[] = "cs3700spring2015 HELLO 583008\n";
-	ssize_t x;
-	x = write(c->sockfd, write_buffer, sizeof(write_buffer));
+	strcpy(buffer, "cs3700spring2015 HELLO 583008\n");
+	x = write(c->sockfd, buffer, strlen(buffer));
 	printf("%lu bytes written\n", x);
 
 	// Now listen 
-	x = read(c->sockfd, read_buffer, sizeof(read_buffer)); 	
-	printf("%s\n", read_buffer);
+	x = read(c->sockfd, buffer, 256); 	
+	printf("%s\n", buffer);
 	printf("%lu bytes read\n", x);
+
+	// Calling a function to evaluate the string
+	sol = clientMath(c, buffer);
+	printf("%d\n", sol);
 	
 	// Let's make sure to close the connection
 	close(c->sockfd);	
 }
 int clientInit(client *c) {
-	struct sockaddr_in soc;
-	struct hostent *host;
-	int status;
+	struct 	sockaddr_in soc;
+	struct 	hostent *host;
+	int 	status;
 
 	// Let's first create a socket
 	c->sockfd = socket(PF_INET, SOCK_STREAM, 0);
@@ -82,4 +86,8 @@ int clientInit(client *c) {
 	}
 
 	return 0;
+}
+int clientMath(client *c, char buffer[256]) {
+	printf("%s\n", buffer);
+	return 1;
 }

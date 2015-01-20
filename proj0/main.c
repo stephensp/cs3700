@@ -5,8 +5,8 @@
 
 int main(int argc, char *argv[]) {
 
-	int port, studentID;
-	char *hostname;
+	int 	port, studentID;
+	char 	*hostname;
 
 	if(argc != 3 && argc != 5) {
 		printf("Usage: 3700client <-p port> [hostname] [NEU ID]\n");

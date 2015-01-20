@@ -13,4 +13,6 @@ void setStudentID(client *c, int studentID);
 void setHostname(client *c, char *hostname);
 void clientRun(client *c);
 int clientInit(client *c); 
+int clientMath(client *c, char buffer[256]);
+
 
