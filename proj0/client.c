@@ -44,7 +44,12 @@ void clientRun(client *c) {
 
 	// Calling a function to evaluate the string
 	sol = clientMath(c, buffer);
-	printf("%d\n", sol);
+	printf("solution is %d\n", sol);
+
+	strcpy(buffer,"cs3700spring2015 ");	
+	printf("strlen(buffer) = %lu\n", strlen(buffer));
+	
+	x = write(c->sockfd, buffer, strlen(buffer));
 	
 	// Let's make sure to close the connection
 	close(c->sockfd);	
@@ -88,6 +93,75 @@ int clientInit(client *c) {
 	return 0;
 }
 int clientMath(client *c, char buffer[256]) {
-	printf("%s\n", buffer);
+	// Now to parse the string in C, which will be ugly	
+	char 	m1[] = "cs3700spring2015 ";
+	char	m3[] = "STATUS ";
+	char	y1[1000], y2[1000], p[3];
+	int 	l1, l2, l3, start, stat, x1, x2, op, q, stat2, q2, sol;
+	int 	i;
+
+	l1 = strlen(m1);   	
+	l2 = strlen(buffer);
+	l3 = strlen(m3);
+	stat = 0;
+
+	// First check to make sure that the message is formatted correctly
+	for(i = 0; i < (l1+l3); i++) {
+		if(i < l1) {
+			if(buffer[i] != m1[i]) {
+				// Add real error handling
+				printf("string does not match, ending\n");
+				break;
+			}
+		}else {
+			if(buffer[i] != m3[i-l1]) {
+				stat = 1;
+				break;
+			}
+		}
+	}
+	start = i;	
+	q = 0;
+	stat2 = 0;
+	for(i = start; i < l2; i++) {
+		if(buffer[i] == 10) {
+			break;
+		}
+		if((buffer[i] < 48) || (buffer[i] > 57)) {
+			memcpy(p, &(buffer[i]) , 3);
+			op = p[1];
+			stat2 = 1;
+			i = i+2;
+
+		}else if(stat2 == 1) {
+			y1[q] = buffer[i];
+			q++;
+		}else {
+			y2[q2] = buffer[i];
+			q2++;	
+		}
+
+
+	}
+	x1 = atoi(y1);
+	x2 = atoi(y2);
+	printf("x1=%d\n", x1);
+	printf("op = %d\n", op); 
+	printf("x2=%d\n", x2);
+
+	if(op == 43) {
+		return (x1 + x2);
+	}
+	if(op == 45) {
+		return (x2 - x1);
+	}
+	if(op == 42) { 
+		return (x1 * x2);
+	}
+	if(op == 47) {
+		return (x2 / x1);
+	}
+	
+
 	return 1;
 }
