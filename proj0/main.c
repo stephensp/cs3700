@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 	// Set port to user specified port
 	if(argc == 5) {
 		// Get an int version of the char
+		// Need to add check for -p flag and valid port number
 		port = atoi(argv[2]);
 		studentID = atoi(argv[4]);
 		hostname = argv[3];
