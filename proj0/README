@@ -1,0 +1,3 @@
+
+watch port with following command:
+sudo tcpdump port 27933 -vv
