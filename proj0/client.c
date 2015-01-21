@@ -13,13 +13,12 @@
 #include "client.h"
 
 
-int SUCCESS	= 0;
-int FAIL	= 0;
+int state = 0; 
 
 // setPort()
 // Sets port number from user input
-// @client* 
-// @int port number
+// @param c client 
+// @param port
 void setPort(client *c, int port) {
 	printf(" setting port to %d\n", port);
 	c->port = port;
@@ -28,8 +27,8 @@ void setPort(client *c, int port) {
 
 // setStudentID()
 // Sets studentID from user input
-// @client* 
-// @int studentID 
+// @param c client 
+// @param studentID 
 void setStudentID(client *c, int studentID) {
 	printf(" setting studentID to %d\n", studentID);
 	c->studentID = studentID;
@@ -37,8 +36,8 @@ void setStudentID(client *c, int studentID) {
 
 // setHostname()
 // Sets Hostname from user input
-// @client* 
-// @int setHostname 
+// @param c client 
+// @param hostname 
 void setHostname(client *c, char *hostname) {
 	printf(" setting hostname to %s\n", hostname);
 	c->hostname = hostname;
@@ -47,11 +46,11 @@ void setHostname(client *c, char *hostname) {
 // clientRun()
 // The main function which runs a while loop for sending and receiving
 // messages from the server
-// @c
+// @param c client
 void clientRun(client *c) {
 	char	ascSol[7];
 	char	*buffer, *write_buffer;
-	ssize_t	x;
+	ssize_t	buff_size;
 	int	sol;
 
 	if(clientInit(c) == -1) {
@@ -63,8 +62,8 @@ void clientRun(client *c) {
 	}
 	
 	// If init was sucessful we can allocate our buffers
-	c->buffer = (char *)malloc(256);
-	c->write_buffer = (char *)malloc(256);
+	c->buffer = (char *)malloc(BUFF_SIZE);
+	c->write_buffer = (char *)malloc(BUFF_SIZE);
 
 	buffer = c->buffer;
 	write_buffer = c->write_buffer;
@@ -75,21 +74,21 @@ void clientRun(client *c) {
 	buffer[strlen(buffer)] = 10; // Add \n to end
 
 	printf("Writing hello message\n");
-	x = write(c->sockfd, buffer, strlen(buffer));
+	buff_size = write(c->sockfd, buffer, strlen(buffer));
 
 	// Run continuous loop until a BYE message is received from the 
-	// server, SUCCCESS or FAIL being set will cause the program to 
+	// server, SUCCCESS or state being set will cause the program to 
 	// terminate
 	while(1) {
 		// Check if the previous message was the final message
-		if(SUCCESS == 1) {
+		if(state == SUCCESS) {
 			printf("%s\n", buffer);
 			printf("Success...exiting program!\n");
 			break;
 		}
 
 		// Check if the previous message caused a failure
-		if(FAIL == 1) {
+		if(state == FAIL) {
 			printf("Failure encountered on following message \n");
 			printf("%s\n", buffer);
 			break;
@@ -98,11 +97,11 @@ void clientRun(client *c) {
 		// Clear buffers, use two different buffers to make debugging
 		// easier if a failure occur. We wouldn't want to overwrite
 		// the string that caused our failure
-		memset(buffer,0,256);
-		memset(write_buffer,0,256);
+		memset(buffer, 0, BUFF_SIZE);
+		memset(write_buffer, 0, BUFF_SIZE);
 
 		// Now listening 
-		x = read(c->sockfd, buffer, 256); 	
+		buff_size = read(c->sockfd, buffer, BUFF_SIZE); 	
 		
 		// Evaluate the expression in the string
 		sol = clientMath(c);
@@ -113,7 +112,7 @@ void clientRun(client *c) {
 		write_buffer[strlen(write_buffer)] = 10; // Add \n to end
 
 		// Now write our response
-		x = write(c->sockfd, write_buffer, strlen(write_buffer));
+		buff_size = write(c->sockfd, write_buffer,strlen(write_buffer));
 		
 	}
 
@@ -127,7 +126,7 @@ void clientRun(client *c) {
 
 // clientInit()
 // Handles creating the socket and connecting to the server
-// @c
+// @param c client
 // @return -1 on failure 0 on success
 int clientInit(client *c) {
 	struct 	sockaddr_in soc;
@@ -167,7 +166,7 @@ int clientInit(client *c) {
 
 // clientMath()
 // Evaluates the math expression given by the server
-// @c
+// @param c client
 // @return int solution to the expression
 int clientMath(client *c) {
 	// Now to parse the string in C, which will be ugly	
@@ -194,7 +193,7 @@ int clientMath(client *c) {
 		// Check that cs3700spring2015 is the beginning of the mes
 		if(i < l1) {
 			if(buffer[i] != m1[i]) {
-				FAIL = 1;
+				state = FAIL;
 				printf("string does not match, ending\n");
 				break;
 			}
@@ -204,10 +203,10 @@ int clientMath(client *c) {
 			if(buffer[i] != m3[i-l1]) {
 				if(clientCheckSuc(c, &buffer[i])) {
 					// We got a BYE message
-					SUCCESS = 1;
+					state = SUCCESS;
 				}else{
 					// We just got a bad format
-					FAIL = 1;
+					state = FAIL;
 				}
 				break;
 			}
@@ -254,21 +253,21 @@ int clientMath(client *c) {
 	free(y2);
 
 	// Now check the operators and do math accordingly
-	if(op == 43) {
+	if(op == '+') {
 		return (x1 + x2);
 	}
-	if(op == 45) {
+	if(op == '-') {
 		return (x1 - x2);
 	}
-	if(op == 42) { 
+	if(op == '*') { 
 		return (x1 * x2);
 	}
-	if(op == 47) {
+	if(op == '/') {
 		return (x1 / x2);
 	}else {
-		if(SUCCESS != 1) {
+		if(state == RUNNING) {
 			printf("Error: non valid operator\n");
-			FAIL = 1;
+			state = FAIL;
 		}
 		return 0;
 	}
@@ -279,18 +278,18 @@ int clientMath(client *c) {
 // clientCheckSuc()
 // Checks thata SUCCCESS message was received and not a wrongly formatted
 // message
-// @client structure
-// @char * buffer to check against, will start at where success message should
+// @param c client
+// @param buffer to check against, will start at where success message should
 // 	exists. 
 // @return 1 for success, 0 for failure
 int clientCheckSuc(client *c, char *buffer) {
-	char	m[] = "EYB";
+	char	m[] = "BYE";
 	ssize_t	x;
 	int	i;
 
 	x = strlen(buffer);	
 	for(i = 0; i < 3  ; i++) {
-		if(buffer[x-i-2] != m[i]) {
+		if(buffer[x-i-2] != m[2-i]) {
 			return 0;
 		}
 	}

@@ -1,3 +1,13 @@
+CS3700: Project 0
 
-watch port with following command:
-sudo tcpdump port 27933 -vv
+Allison Alder
+Portia Stephens
+
+
+Due to the simplicity of this project the main design decision we made
+was to write in C. Although this added some complexity to the project,
+we felt that it helped give us a better lower level understanding of what 
+was happening.
+
+The major challenge we faced was parsing string in C, which turned out to 
+be a bit messy.

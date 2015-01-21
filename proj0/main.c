@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
+#include <string.h>
 #include "client.h"
 
 int main(int argc, char *argv[]) {
@@ -30,6 +31,10 @@ int main(int argc, char *argv[]) {
 
 	// Set port to user specified port
 	if(argc == 5) {
+		if(!strcmp("-p", argv[2])) {
+		printf("Usage: 3700client <-p port> [hostname] [NEU ID]\n");
+		return 0;
+		}
 		// Get an int version of the char
 		port = atoi(argv[2]);
 		studentID = atoi(argv[4]);
@@ -43,6 +48,9 @@ int main(int argc, char *argv[]) {
 
 	// Now run!
 	clientRun(c);
+
+	// Clean up
+	free(c);
 
 	return 0;
 }
