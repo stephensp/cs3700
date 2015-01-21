@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-c -Wall -Werror
+CFLAGS=-c 
 LDFLAGS=
 SOURCES=main.c client.c
 OBJECTS=$(SOURCES:.c=.o)

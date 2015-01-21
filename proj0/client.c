@@ -8,6 +8,10 @@
 #include <arpa/inet.h>
 #include "client.h"
 
+
+int SUCCESS	= 0;
+int FAIL	= 0;
+
 void setPort(client *c, int port) {
 	printf(" setting port to %d\n", port);
 	c->port = port;
@@ -21,9 +25,10 @@ void setHostname(client *c, char *hostname) {
 	c->hostname = hostname;
 }
 void clientRun(client *c) {
-	char	buffer[256];
-	ssize_t	x;
-	int	sol;
+	char	buffer[256], write_buffer[256];
+	char	ascSol[7];
+	ssize_t	x, buff_length;
+	int	sol, cnt, dig, max;
 
 	if(clientInit(c) == -1) {
 		// Gotta add some real error handling
@@ -33,24 +38,42 @@ void clientRun(client *c) {
 	}
 
 	// Send hello message
-	strcpy(buffer, "cs3700spring2015 HELLO 583008\n");
-	x = write(c->sockfd, buffer, strlen(buffer));
-	printf("%lu bytes written\n", x);
-
-	// Now listen 
-	x = read(c->sockfd, buffer, 256); 	
-	printf("%s\n", buffer);
-	printf("%lu bytes read\n", x);
-
-	// Calling a function to evaluate the string
-	sol = clientMath(c, buffer);
-	printf("solution is %d\n", sol);
-
-	strcpy(buffer,"cs3700spring2015 ");	
-	printf("strlen(buffer) = %lu\n", strlen(buffer));
+	strcpy(buffer, "cs3700spring2015 HELLO ");
+	sprintf(&(buffer[strlen(buffer)]), "%d", c->studentID);
+	buffer[strlen(buffer)] = 10;
 	
 	x = write(c->sockfd, buffer, strlen(buffer));
+	int z;
+	while(1) {
+		// Clear buffers
+		memset(buffer,0,256);
+		memset(write_buffer,0,256);
+
+		// Now listen 
+		x = read(c->sockfd, buffer, 256); 	
+
+		// Calling a function to evaluate the string
+		sol = clientMath(c, buffer);
+		if(SUCCESS == 1) {
+			printf("%s\n", buffer);
+			break;
+		}
+		if(FAIL == 1) {
+			printf("FAILURE\n");
+			break;
+		}
+
+		strcpy(write_buffer,"cs3700spring2015 ");	
+		sprintf(&(write_buffer[17]), "%d", sol);
+		buff_length = strlen(write_buffer);
 	
+
+		// Add new line
+		write_buffer[strlen(write_buffer)] = 10;
+
+		x = write(c->sockfd, write_buffer, strlen(write_buffer));
+	}
+
 	// Let's make sure to close the connection
 	close(c->sockfd);	
 }
@@ -75,8 +98,6 @@ int clientInit(client *c) {
 	}
 
 	// Set socket info
-	printf("htonl(port) = %08x\n", c->port);
-//	soc.sin_addr.s_addr = inet_addr("129.10.117.250");
 	memcpy(&(soc.sin_addr.s_addr), host->h_addr, host->h_length);
 	soc.sin_port = htons(c->port);
 	soc.sin_family = AF_INET;
@@ -84,7 +105,6 @@ int clientInit(client *c) {
 	// Next connect client socket to server socket
 	status = connect(c->sockfd, (struct sockaddr *) &soc, sizeof(soc));
 	
-	printf("status = %d\n", status);
 	if(status == -1) {
 		printf("Error: failed to connect to server\n");
 		return -1;
@@ -104,6 +124,8 @@ int clientMath(client *c, char buffer[256]) {
 	l2 = strlen(buffer);
 	l3 = strlen(m3);
 	stat = 0;
+	memset(y1,0,1000);
+	memset(y2,0,1000);
 
 	// First check to make sure that the message is formatted correctly
 	for(i = 0; i < (l1+l3); i++) {
@@ -116,6 +138,7 @@ int clientMath(client *c, char buffer[256]) {
 		}else {
 			if(buffer[i] != m3[i-l1]) {
 				stat = 1;
+				SUCCESS = 1;
 				break;
 			}
 		}
@@ -145,9 +168,6 @@ int clientMath(client *c, char buffer[256]) {
 	}
 	x1 = atoi(y1);
 	x2 = atoi(y2);
-	printf("x1=%d\n", x1);
-	printf("op = %d\n", op); 
-	printf("x2=%d\n", x2);
 
 	if(op == 43) {
 		return (x1 + x2);
@@ -160,8 +180,14 @@ int clientMath(client *c, char buffer[256]) {
 	}
 	if(op == 47) {
 		return (x2 / x1);
+	}else {
+		if(SUCCESS != 1) {
+			printf("Error: non valid operator\n");
+			FAIL = 1;
+		}
+		return 0;
 	}
 	
 
-	return 1;
+
 }
