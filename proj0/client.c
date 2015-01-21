@@ -41,8 +41,11 @@ void clientRun(client *c) {
 	strcpy(buffer, "cs3700spring2015 HELLO ");
 	sprintf(&(buffer[strlen(buffer)]), "%d", c->studentID);
 	buffer[strlen(buffer)] = 10;
+
+	printf("About to write hello message\n");
 	
 	x = write(c->sockfd, buffer, strlen(buffer));
+
 	int z;
 	while(1) {
 		// Clear buffers
@@ -51,9 +54,11 @@ void clientRun(client *c) {
 
 		// Now listen 
 		x = read(c->sockfd, buffer, 256); 	
+		
 
 		// Calling a function to evaluate the string
 		sol = clientMath(c, buffer);
+		
 		if(SUCCESS == 1) {
 			printf("%s\n", buffer);
 			break;
@@ -72,6 +77,7 @@ void clientRun(client *c) {
 		write_buffer[strlen(write_buffer)] = 10;
 
 		x = write(c->sockfd, write_buffer, strlen(write_buffer));
+		
 	}
 
 	// Let's make sure to close the connection
@@ -116,7 +122,9 @@ int clientMath(client *c, char buffer[256]) {
 	// Now to parse the string in C, which will be ugly	
 	char 	m1[] = "cs3700spring2015 ";
 	char	m3[] = "STATUS ";
-	char	y1[1000], y2[1000], p[3];
+	char	p[3];
+	char*	y1;
+	char*	y2;
 	int 	l1, l2, l3, start, stat, x1, x2, op, q, stat2, q2, sol;
 	int 	i;
 
@@ -124,6 +132,8 @@ int clientMath(client *c, char buffer[256]) {
 	l2 = strlen(buffer);
 	l3 = strlen(m3);
 	stat = 0;
+	y1 = (char *) malloc(1000);
+	y2 = (char *) malloc(1000);
 	memset(y1,0,1000);
 	memset(y2,0,1000);
 
@@ -144,7 +154,10 @@ int clientMath(client *c, char buffer[256]) {
 		}
 	}
 	start = i;	
+	
+	
 	q = 0;
+	q2 = 0;
 	stat2 = 0;
 	for(i = start; i < l2; i++) {
 		if(buffer[i] == 10) {
@@ -166,8 +179,12 @@ int clientMath(client *c, char buffer[256]) {
 
 
 	}
+	
 	x1 = atoi(y1);
 	x2 = atoi(y2);
+
+	free(y1);
+	free(y2);
 
 	if(op == 43) {
 		return (x1 + x2);
